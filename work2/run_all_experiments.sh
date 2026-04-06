@@ -26,26 +26,26 @@ if [[ "$MULTI_GPU" == "1" ]]; then
 fi
 
 # 1) ResNeXt scratch
-"$PYTHON" ./work2/train_flowers102.py \
+"$PYTHON" ./work2/train_food101.py \
   --model resnext50_32x4d --mode scratch \
   --scratch-epochs 60 --scratch-lr 0.01 \
   "${COMMON_ARGS[@]}"
 
 # 2) ResNeXt finetune
-"$PYTHON" ./work2/train_flowers102.py \
+"$PYTHON" ./work2/train_food101.py \
   --model resnext50_32x4d --mode finetune \
   --freeze-epochs 10 --finetune-epochs 40 \
   --head-lr 0.001 --backbone-lr 0.0001 \
   "${COMMON_ARGS[@]}"
 
 # 3) DenseNet scratch
-"$PYTHON" ./work2/train_flowers102.py \
+"$PYTHON" ./work2/train_food101.py \
   --model densenet121 --mode scratch \
   --scratch-epochs 60 --scratch-lr 0.01 \
   "${COMMON_ARGS[@]}"
 
 # 4) DenseNet finetune
-"$PYTHON" ./work2/train_flowers102.py \
+"$PYTHON" ./work2/train_food101.py \
   --model densenet121 --mode finetune \
   --freeze-epochs 10 --finetune-epochs 40 \
   --head-lr 0.001 --backbone-lr 0.0001 \
