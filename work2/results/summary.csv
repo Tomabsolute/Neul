@@ -1,0 +1,5 @@
+experiment,model,mode,dataset,best_val_acc,test_acc,test_macro_f1,train_seconds,train_hours,device
+food101_resnext50_32x4d_scratch,resnext50_32x4d,scratch,food101,0.728317,0.785743,0.785183,11921.7,3.3116,cuda
+food101_resnext50_32x4d_finetune,resnext50_32x4d,finetune,food101,0.753267,0.797782,0.795660,9466.3,2.6295,cuda
+food101_densenet121_scratch,densenet121,scratch,food101,0.737294,0.793703,0.793251,24265.5,6.7404,cuda
+food101_densenet121_finetune,densenet121,finetune,food101,0.775710,0.823960,0.823020,19733.8,5.4816,cuda

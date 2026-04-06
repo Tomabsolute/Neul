@@ -1,0 +1,53 @@
+{
+  "experiments": [
+    {
+      "experiment": "food101_resnext50_32x4d_scratch",
+      "model": "resnext50_32x4d",
+      "mode": "scratch",
+      "dataset": "food101",
+      "best_val_acc": "0.728317",
+      "test_acc": "0.785743",
+      "test_macro_f1": "0.785183",
+      "train_seconds": "11921.7",
+      "train_hours": "3.3116",
+      "device": "cuda"
+    },
+    {
+      "experiment": "food101_resnext50_32x4d_finetune",
+      "model": "resnext50_32x4d",
+      "mode": "finetune",
+      "dataset": "food101",
+      "best_val_acc": "0.753267",
+      "test_acc": "0.797782",
+      "test_macro_f1": "0.795660",
+      "train_seconds": "9466.3",
+      "train_hours": "2.6295",
+      "device": "cuda"
+    },
+    {
+      "experiment": "food101_densenet121_scratch",
+      "model": "densenet121",
+      "mode": "scratch",
+      "dataset": "food101",
+      "best_val_acc": "0.737294",
+      "test_acc": "0.793703",
+      "test_macro_f1": "0.793251",
+      "train_seconds": "24265.5",
+      "train_hours": "6.7404",
+      "device": "cuda"
+    },
+    {
+      "experiment": "food101_densenet121_finetune",
+      "model": "densenet121",
+      "mode": "finetune",
+      "dataset": "food101",
+      "best_val_acc": "0.775710",
+      "test_acc": "0.823960",
+      "test_macro_f1": "0.823020",
+      "train_seconds": "19733.8",
+      "train_hours": "5.4816",
+      "device": "cuda"
+    }
+  ],
+  "total_train_hours": 18.1631
+}

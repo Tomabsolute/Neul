@@ -1,0 +1,44 @@
+{
+  "experiment": "food101_resnext50_32x4d_finetune",
+  "dataset": "food101",
+  "model": "resnext50_32x4d",
+  "mode": "finetune",
+  "device": "cuda",
+  "num_gpus": 2,
+  "multi_gpu": true,
+  "num_classes": 101,
+  "dataset_sizes": {
+    "train": 68175,
+    "val": 7575,
+    "test": 25250
+  },
+  "best_val_acc": 0.7532673267326733,
+  "test": {
+    "loss": 0.7333613753389604,
+    "acc": 0.7977821782178218,
+    "macro_f1": 0.7956597378343223
+  },
+  "train_seconds": 9466.260234832764,
+  "train_hours": 2.62951673189799,
+  "args": {
+    "data_root": "./work2/data",
+    "out_dir": "./work2/results",
+    "model": "resnext50_32x4d",
+    "mode": "finetune",
+    "batch_size": 64,
+    "num_workers": 8,
+    "image_size": 224,
+    "val_ratio": 0.1,
+    "seed": 42,
+    "amp": true,
+    "multi_gpu": true,
+    "scratch_epochs": 60,
+    "scratch_lr": 0.01,
+    "freeze_epochs": 10,
+    "finetune_epochs": 40,
+    "head_lr": 0.001,
+    "backbone_lr": 0.0001,
+    "momentum": 0.9,
+    "weight_decay": 0.0001
+  }
+}

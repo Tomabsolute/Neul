@@ -1,0 +1,44 @@
+{
+  "experiment": "food101_densenet121_finetune",
+  "dataset": "food101",
+  "model": "densenet121",
+  "mode": "finetune",
+  "device": "cuda",
+  "num_gpus": 2,
+  "multi_gpu": true,
+  "num_classes": 101,
+  "dataset_sizes": {
+    "train": 68175,
+    "val": 7575,
+    "test": 25250
+  },
+  "best_val_acc": 0.7757095709570957,
+  "test": {
+    "loss": 0.641039822691738,
+    "acc": 0.8239603960396039,
+    "macro_f1": 0.8230197401393357
+  },
+  "train_seconds": 19733.817880630493,
+  "train_hours": 5.481616077952915,
+  "args": {
+    "data_root": "./work2/data",
+    "out_dir": "./work2/results",
+    "model": "densenet121",
+    "mode": "finetune",
+    "batch_size": 64,
+    "num_workers": 8,
+    "image_size": 224,
+    "val_ratio": 0.1,
+    "seed": 42,
+    "amp": true,
+    "multi_gpu": true,
+    "scratch_epochs": 60,
+    "scratch_lr": 0.01,
+    "freeze_epochs": 10,
+    "finetune_epochs": 40,
+    "head_lr": 0.001,
+    "backbone_lr": 0.0001,
+    "momentum": 0.9,
+    "weight_decay": 0.0001
+  }
+}
