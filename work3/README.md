@@ -19,7 +19,7 @@ bash work3/run_all_experiments.sh
 可选环境变量：
 
 ```bash
-PYTHON=python3 EPOCHS=20 BATCH_SIZE=128 NUM_SAMPLES=6000 NUM_WORKERS=4 bash work3/run_all_experiments.sh
+PYTHON=python3 EPOCHS=50 BATCH_SIZE=128 NUM_SAMPLES=20000 NUM_WORKERS=4 bash work3/run_all_experiments.sh
 ```
 
 ## 单独训练
@@ -28,9 +28,9 @@ PYTHON=python3 EPOCHS=20 BATCH_SIZE=128 NUM_SAMPLES=6000 NUM_WORKERS=4 bash work
 python3 work3/train_cgan.py \
   --dataset fashion-mnist \
   --download \
-  --epochs 20 \
+  --epochs 50 \
   --batch-size 128 \
-  --num-samples 6000 \
+  --num-samples 20000 \
   --num-workers 4
 ```
 
@@ -42,7 +42,27 @@ python3 work3/train_cgan.py \
 - `work3/results/cgan_fashion_mnist/curves.png`
 - `work3/results/cgan_fashion_mnist/samples/epoch_*.png`
 
+## 当前实验结果
+
+本次服务器实验配置为 `NUM_SAMPLES=20000`、`EPOCHS=50`、`BATCH_SIZE=128`。主要结果：
+
+| 指标 | 数值 |
+|---|---:|
+| final D loss | 1.1678 |
+| final G loss | 1.0780 |
+| final D(real) | 0.5849 |
+| final D(fake) | 0.4131 |
+
+最终推理图为 `work3/results/figures/inference_grid.png`。从可视化结果看，裤子、鞋、包等轮廓已经比较清楚，上衣类之间仍有一定混淆。
+
 ## 推理生成
+
+仓库中已经包含训练好的模型：
+
+- `work3/results/cgan_fashion_mnist/checkpoints/best_generator.pt`
+- `work3/results/cgan_fashion_mnist/checkpoints/last_checkpoint.pt`
+
+因此克隆仓库并安装依赖后，可以直接运行推理：
 
 ```bash
 python3 work3/infer.py \
@@ -69,11 +89,11 @@ Fashion-MNIST 标签含义：
 
 ## 模型下载
 
-训练完成后，将 `work3/results/cgan_fashion_mnist/checkpoints/best_generator.pt` 上传到 Gitee Release、GitHub Release 或网盘直链即可。下载脚本如下：
+本次提交已经把模型文件放在仓库目录中，正常情况下不需要额外下载。如需下载，可使用：
 
 ```bash
 python3 work3/download_model.py \
-  --url "https://your-release-url/best_generator.pt" \
+  --url "https://raw.githubusercontent.com/Tomabsolute/Neul/main/work3/results/cgan_fashion_mnist/checkpoints/best_generator.pt" \
   --output work3/results/cgan_fashion_mnist/checkpoints/best_generator.pt
 ```
 

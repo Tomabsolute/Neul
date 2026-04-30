@@ -12,6 +12,8 @@
 \usepackage{listings}
 \usepackage{xcolor}
 
+\graphicspath{{figures/}{work1/figures/}}
+
 \geometry{a4paper,margin=1.7cm,columnsep=0.75cm}
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0.25em}
@@ -363,7 +365,7 @@ for i in range(n_w):
 layers = np.array([X.shape[0], 128, 64, Y.shape[0]])
 Net = NeuralNetwork(layers, 'sigmoid', 'GD', use_gpu=True)
 Net.train(X, Y, 1, 0.1,10000)
-Net.plot_precision("sigmoid_GD.png")
+Net.plot_precision("figures/sigmoid_GD.png")
 
 testX_dev = to_gpu(testX) if GPU_AVAILABLE else testX
 testY_dev = to_gpu(testY) if GPU_AVAILABLE else testY

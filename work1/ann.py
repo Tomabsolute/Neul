@@ -6,6 +6,7 @@
 import numpy as np
 import struct
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 try:
     import cupy as cp
@@ -392,7 +393,9 @@ if __name__ == "__main__":
 
     Net.train(X, Y, 1, 0.1,10000)
 
-    Net.plot_precision("sigmoid_GD.png")
+    figures_dir = Path(__file__).resolve().parent / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    Net.plot_precision(str(figures_dir / "sigmoid_GD.png"))
 
     testX_dev = to_gpu(testX) if GPU_AVAILABLE else testX
     testY_dev = to_gpu(testY) if GPU_AVAILABLE else testY
