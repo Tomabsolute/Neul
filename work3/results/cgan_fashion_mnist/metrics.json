@@ -1,0 +1,10 @@
+{
+  "dataset": "fashion-mnist",
+  "num_samples": 20000,
+  "epochs": 50,
+  "batch_size": 128,
+  "z_dim": 100,
+  "total_seconds": 283.5726225376129,
+  "final_d_loss": 1.1678145676851273,
+  "final_g_loss": 1.077971094311812
+}
