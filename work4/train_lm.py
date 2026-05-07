@@ -9,6 +9,7 @@ from pathlib import Path
 
 import torch
 from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset
 
 from src.data_utils import EOS, Vocab, char_tokens, extract_qa_pairs, normalize_text, read_text, split_train_val
@@ -16,18 +17,41 @@ from src.models import CharLSTMModel
 from src.plotting import plot_lm_history
 
 
-class CharWindowDataset(Dataset):
-    def __init__(self, ids: list[int], seq_len: int) -> None:
-        self.ids = ids
-        self.seq_len = seq_len
+class QAPairDataset(Dataset):
+    def __init__(self, pairs: list[dict[str, str]], vocab: Vocab, max_len: int) -> None:
+        self.samples = []
+        self.vocab = vocab
+        self.max_len = max_len
+        bos_id = vocab.stoi["<bos>"]
+        eos_id = vocab.stoi[EOS]
+        for pair in pairs:
+            prompt_tokens = char_tokens(pair["prompt"])
+            answer_tokens = char_tokens(pair["answer"])
+            ids = [bos_id] + vocab.encode(prompt_tokens + answer_tokens) + [eos_id]
+            prompt_boundary = 1 + len(prompt_tokens)
+            if len(ids) > max_len + 1:
+                dropped = len(ids) - (max_len + 1)
+                ids = ids[dropped:]
+                prompt_boundary = max(0, prompt_boundary - dropped)
+            self.samples.append((ids, prompt_boundary))
 
     def __len__(self) -> int:
-        return max(0, len(self.ids) - self.seq_len)
+        return len(self.samples)
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
-        x = torch.tensor(self.ids[idx : idx + self.seq_len], dtype=torch.long)
-        y = torch.tensor(self.ids[idx + 1 : idx + self.seq_len + 1], dtype=torch.long)
+        ids, prompt_boundary = self.samples[idx]
+        x = torch.tensor(ids[:-1], dtype=torch.long)
+        y = torch.tensor(ids[1:], dtype=torch.long)
+        positions = torch.arange(1, len(ids), dtype=torch.long)
+        y = y.masked_fill(positions < prompt_boundary, -100)
         return x, y
+
+
+def collate_qa_batch(batch: list[tuple[torch.Tensor, torch.Tensor]], pad_id: int) -> tuple[torch.Tensor, torch.Tensor]:
+    xs, ys = zip(*batch)
+    x = pad_sequence(xs, batch_first=True, padding_value=pad_id)
+    y = pad_sequence(ys, batch_first=True, padding_value=-100)
+    return x, y
 
 
 def choose_device(name: str) -> torch.device:
@@ -50,8 +74,9 @@ def evaluate_loss(model: nn.Module, loader: DataLoader, criterion: nn.Module, de
         y = y.to(device)
         logits, _ = model(x)
         loss = criterion(logits.reshape(-1, logits.size(-1)), y.reshape(-1))
-        total_loss += loss.item() * y.numel()
-        total_tokens += y.numel()
+        valid_tokens = (y != -100).sum().item()
+        total_loss += loss.item() * valid_tokens
+        total_tokens += valid_tokens
     return total_loss / max(1, total_tokens)
 
 
@@ -86,6 +111,7 @@ def generate(
 
 
 def answer_hit(pred: str, gold: str) -> bool:
+    pred = pred.split(EOS, 1)[0]
     gold_chars = [ch for ch in gold.replace("。", "") if ch not in "，,；; "]
     if not gold_chars:
         return False
@@ -111,9 +137,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Train a character-level LSTM language model on 九章算术.")
     parser.add_argument("--data", default="work4/九章算经.txt")
     parser.add_argument("--output-dir", default="work4/results/lstm_lm")
-    parser.add_argument("--epochs", type=int, default=40)
-    parser.add_argument("--batch-size", type=int, default=128)
-    parser.add_argument("--seq-len", type=int, default=96)
+    parser.add_argument("--epochs", type=int, default=150)
+    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--seq-len", type=int, default=256)
     parser.add_argument("--embedding-dim", type=int, default=128)
     parser.add_argument("--hidden-dim", type=int, default=256)
     parser.add_argument("--num-layers", type=int, default=2)
@@ -135,15 +161,26 @@ def main() -> None:
         raise RuntimeError("Too few QA pairs were extracted. Check the input text format.")
 
     train_pairs, val_pairs = split_train_val(qa_pairs, val_ratio=0.15, seed=args.seed)
-    train_text = "\n".join(pair["prompt"] + pair["answer"] + EOS for pair in train_pairs)
-    val_text = "\n".join(pair["prompt"] + pair["answer"] + EOS for pair in val_pairs)
-
-    vocab = Vocab.build([char_tokens(train_text + val_text)], min_freq=1)
+    vocab_sequences = []
+    for pair in qa_pairs:
+        vocab_sequences.append(char_tokens(pair["prompt"]) + char_tokens(pair["answer"]) + [EOS])
+    vocab = Vocab.build(vocab_sequences, min_freq=1)
     vocab.save(output_dir / "vocab.json")
-    train_ids = vocab.encode(char_tokens(train_text), add_bos=True, add_eos=True)
-    val_ids = vocab.encode(char_tokens(val_text), add_bos=True, add_eos=True)
-    train_loader = DataLoader(CharWindowDataset(train_ids, args.seq_len), batch_size=args.batch_size, shuffle=True, drop_last=True)
-    val_loader = DataLoader(CharWindowDataset(val_ids, args.seq_len), batch_size=args.batch_size, shuffle=False)
+    train_dataset = QAPairDataset(train_pairs, vocab, args.seq_len)
+    val_dataset = QAPairDataset(val_pairs, vocab, args.seq_len)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        drop_last=False,
+        collate_fn=lambda batch: collate_qa_batch(batch, vocab.stoi["<pad>"]),
+    )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=lambda batch: collate_qa_batch(batch, vocab.stoi["<pad>"]),
+    )
 
     device = choose_device(args.device)
     model = CharLSTMModel(
@@ -154,7 +191,7 @@ def main() -> None:
         dropout=args.dropout,
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
     history: list[dict] = []
     best_val = float("inf")
@@ -171,8 +208,9 @@ def main() -> None:
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
             optimizer.step()
-            total_loss += loss.item() * y.numel()
-            total_tokens += y.numel()
+            valid_tokens = (y != -100).sum().item()
+            total_loss += loss.item() * valid_tokens
+            total_tokens += valid_tokens
 
         train_loss = total_loss / max(1, total_tokens)
         val_loss = evaluate_loss(model, val_loader, criterion, device)
@@ -235,4 +273,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

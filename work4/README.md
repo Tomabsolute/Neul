@@ -13,14 +13,25 @@
 bash work4/run_all_experiments.sh
 ```
 
+当前服务器实验已完成，主要结果：
+
+| 模型 | 指标 | 数值 |
+|---|---|---:|
+| CharLSTM | 最优验证 loss | 0.6956 |
+| CharLSTM | 最优验证 PPL | 2.0049 |
+| CharLSTM | 答案关键词命中率 | 1.0000 |
+| Skip-gram | 最终 loss | 2.3327 |
+| Skip-gram | token 数 | 59239 |
+| Skip-gram | 样本对数 | 473892 |
+
 ## 单独训练 LSTM 语言模型
 
 ```bash
 python3 work4/train_lm.py \
   --data work4/九章算经.txt \
-  --epochs 80 \
-  --batch-size 256 \
-  --seq-len 96 \
+  --epochs 150 \
+  --batch-size 64 \
+  --seq-len 256 \
   --embedding-dim 128 \
   --hidden-dim 256 \
   --num-layers 2
@@ -92,4 +103,4 @@ cd work4
 xelatex report.tex
 ```
 
-服务器训练完成后，报告中的图表会直接引用 `results/lstm_lm/curves.png` 和 `results/word2vec/neighbors.png`。若需要写入最终数值，可从两个 `metrics.json` 中复制。
+报告中的图表会直接引用 `results/lstm_lm/curves.png` 和 `results/word2vec/neighbors.png`，当前 PDF 已按服务器结果更新。

@@ -161,21 +161,45 @@ LM_EPOCHS=80 EMB_EPOCHS=40 BATCH_SIZE=256 \
 \end{verbatim}
 
 \section{实验结果展示}
-训练完成后，LSTM 语言模型会输出 \texttt{metrics.json}、\texttt{history.csv}、\texttt{generation\_samples.md} 和训练曲线。嵌入模型会输出 \texttt{neighbors.md}、\texttt{neighbors.json} 与近邻可视化图。
+服务器实验使用 CUDA 训练，LSTM 训练 80 轮，Skip-gram 训练 40 轮。训练完成后，LSTM 语言模型输出 \texttt{metrics.json}、\texttt{history.csv}、\texttt{generation\_samples.md} 和训练曲线；嵌入模型输出 \texttt{neighbors.md}、\texttt{neighbors.json} 与近邻可视化图。
 
 \begin{table}[H]
 \centering
 \small
-\caption{服务器训练结果记录表}
+\caption{LSTM 语言模型服务器训练结果}
 \begin{tabular}{c|c}
 \toprule
 项目 & 数值 \\
 \midrule
-题答对数量 & 见 \texttt{metrics.json} \\
-验证集最优 loss & 见 \texttt{metrics.json} \\
-验证集最优 PPL & 见 \texttt{metrics.json} \\
-答案关键词命中率 & 见 \texttt{metrics.json} \\
+题答对数量 & 452 \\
+训练 / 验证题答对 & 385 / 67 \\
+词表大小 & 456 \\
+最优验证 epoch & 5 \\
+最优验证 loss & 0.6956 \\
+最优验证 PPL & 2.0049 \\
+答案关键词命中率 & 1.0000 \\
+训练 epoch & 80 \\
 LSTM 参数规模 & 约 1--2M，随词表略变 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Skip-gram 嵌入模型服务器训练结果}
+\begin{tabular}{c|c}
+\toprule
+项目 & 数值 \\
+\midrule
+Token 数量 & 59239 \\
+训练样本对 & 473892 \\
+词表大小 & 1046 \\
+Embedding 维度 & 128 \\
+窗口大小 & 4 \\
+负样本数 & 8 \\
+训练 epoch & 40 \\
+最终 loss & 2.3327 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -197,10 +221,28 @@ LSTM 参数规模 & 约 1--2M，随词表略变 \\
 \end{figure}
 
 \subsection{生成结果分析}
-若模型学习有效，验证题目的生成答案应出现与真实答案相近的数字和单位。例如面积类问题常生成「畝」「步」「頃」等单位，分数约分类问题常生成「分之」结构，粟米换算题常生成粮食单位。即使小模型不能完全算对每一道题，只要在未见题目上稳定生成题型相关单位和数词，就说明它已经学习到《九章算术》中的局部知识模式。
+训练曲线显示，验证集损失在第 5 轮达到最低，此后训练损失继续下降而验证损失上升，说明小规模数据上出现了过拟合。因此实验保存并使用验证损失最低的 \texttt{best\_lstm\_lm.pt}。在手动测试题「今有田廣十五步，從十六步」上，模型生成「一畝」，与原书答案一致，说明模型记住并能复现部分典型题型。
+
+\begin{table}[H]
+\centering
+\small
+\caption{LSTM 生成样例}
+\begin{tabular}{p{0.32\columnwidth}|p{0.25\columnwidth}|p{0.25\columnwidth}}
+\toprule
+题型 & 标准答案 & 生成答案 \\
+\midrule
+田廣十五步，從十六步 & 一畝 & 一畝 \\
+圆形土堡，周四丈八尺，高一丈一尺 & 二千一百一十二尺 & 二千一百一十二尺 \\
+井徑五尺，不知其深 & 五丈七尺五寸 & 五丈三尺三寸、少半寸 \\
+股四尺，弦五尺，求句 & 三尺 & 八尺六寸、太半寸 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+从样例看，模型已经学习到《九章算术》的答案格式、数字表达和单位体系，例如「畝」「尺」「寸」「分之」等模式会稳定出现；但它并没有可靠掌握精确算术推理。关键词命中率达到 1.0，更多反映模型能生成题型相关数字和单位，不代表每道题都计算正确。
 
 \subsection{嵌入结果分析}
-文本嵌入的近邻可以从另一个角度验证学习效果。理想情况下，「田」的近邻会包含「畝」「步」「廣」「從」等面积题相关字符；「分」的近邻会包含「之」「母」「子」等分数表达相关字符；「粟」「米」的近邻会围绕粮食换算术语。若近邻结果呈现这种聚类，说明 Skip-gram 模型捕捉到了古算文本中的上下文共现关系。
+文本嵌入的近邻可以从另一个角度验证学习效果。服务器结果中，「粟」的近邻包含粗米、饭、稻、米等粮食换算相关字，「米」的近邻也集中在饭食和米制品语境中，说明模型较好捕捉到粟米章中的共现关系；「尺」的近邻包含「寸、丈、深、竿、绳」一类长度测量相关字，也符合勾股、井深类题目的语境。「田」的近邻中出现「頃」，「步」的近邻中出现「田」，说明面积单位关系也有一定体现。部分近邻如「惡、箕、圭」等不够理想，主要原因是字符级模型容易受到古文上下文和低频字共现干扰。
 
 \section{不足与改进方向}
 \begin{itemize}
