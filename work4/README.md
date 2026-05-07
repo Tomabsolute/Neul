@@ -17,9 +17,9 @@ bash work4/run_all_experiments.sh
 
 | 模型 | 指标 | 数值 |
 |---|---|---:|
-| CharLSTM | 最优验证 loss | 0.6956 |
-| CharLSTM | 最优验证 PPL | 2.0049 |
-| CharLSTM | 答案关键词命中率 | 1.0000 |
+| CharLSTM | 最优验证 loss | 1.1857 |
+| CharLSTM | 最优验证 PPL | 3.2730 |
+| CharLSTM | 答案关键词命中率 | 0.6333 |
 | Skip-gram | 最终 loss | 2.3327 |
 | Skip-gram | token 数 | 59239 |
 | Skip-gram | 样本对数 | 473892 |
@@ -29,12 +29,14 @@ bash work4/run_all_experiments.sh
 ```bash
 python3 work4/train_lm.py \
   --data work4/九章算经.txt \
-  --epochs 150 \
-  --batch-size 64 \
-  --seq-len 256 \
-  --embedding-dim 128 \
-  --hidden-dim 256 \
-  --num-layers 2
+  --epochs 300 \
+  --batch-size 32 \
+  --seq-len 384 \
+  --embedding-dim 256 \
+  --hidden-dim 512 \
+  --num-layers 2 \
+  --dropout 0.1 \
+  --sample-temperature 0
 ```
 
 输出文件：
@@ -52,7 +54,8 @@ python3 work4/train_lm.py \
 python3 work4/generate_answer.py \
   --checkpoint work4/results/lstm_lm/best_lstm_lm.pt \
   --vocab work4/results/lstm_lm/vocab.json \
-  --prompt "〔示例〕今有田廣十五步，從十六步。問為田幾何？"
+  --prompt "〔示例〕今有田廣十五步，從十六步。問為田幾何？" \
+  --temperature 0
 ```
 
 ## 训练文本嵌入

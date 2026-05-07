@@ -87,7 +87,7 @@ def generate(
     prompt: str,
     device: torch.device,
     max_new_chars: int = 40,
-    temperature: float = 0.8,
+    temperature: float = 0.0,
 ) -> str:
     model.eval()
     ids = vocab.encode(char_tokens(prompt))
@@ -99,9 +99,13 @@ def generate(
     generated: list[int] = []
     for _ in range(max_new_chars):
         logits, hidden = model(current, hidden)
-        next_logits = logits[:, -1, :] / max(temperature, 1e-4)
-        probs = torch.softmax(next_logits, dim=-1)
-        next_id = torch.multinomial(probs, num_samples=1)
+        next_logits = logits[:, -1, :]
+        if temperature <= 0:
+            next_id = torch.argmax(next_logits, dim=-1, keepdim=True)
+        else:
+            next_logits = next_logits / temperature
+            probs = torch.softmax(next_logits, dim=-1)
+            next_id = torch.multinomial(probs, num_samples=1)
         token = vocab.itos[next_id.item()]
         if token == EOS:
             break
@@ -137,15 +141,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Train a character-level LSTM language model on 九章算术.")
     parser.add_argument("--data", default="work4/九章算经.txt")
     parser.add_argument("--output-dir", default="work4/results/lstm_lm")
-    parser.add_argument("--epochs", type=int, default=150)
-    parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--seq-len", type=int, default=256)
-    parser.add_argument("--embedding-dim", type=int, default=128)
-    parser.add_argument("--hidden-dim", type=int, default=256)
+    parser.add_argument("--epochs", type=int, default=300)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--seq-len", type=int, default=384)
+    parser.add_argument("--embedding-dim", type=int, default=256)
+    parser.add_argument("--hidden-dim", type=int, default=512)
     parser.add_argument("--num-layers", type=int, default=2)
-    parser.add_argument("--dropout", type=float, default=0.2)
+    parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--lr", type=float, default=2e-3)
     parser.add_argument("--grad-clip", type=float, default=1.0)
+    parser.add_argument("--sample-temperature", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="auto")
     args = parser.parse_args()
@@ -244,7 +249,7 @@ def main() -> None:
     samples = []
     hits = 0
     for pair in val_pairs[: min(30, len(val_pairs))]:
-        gen = generate(model, vocab, pair["prompt"], device=device, max_new_chars=50, temperature=0.75)
+        gen = generate(model, vocab, pair["prompt"], device=device, max_new_chars=80, temperature=args.sample_temperature)
         hit = answer_hit(gen, pair["answer"])
         hits += int(hit)
         samples.append({"prompt": pair["prompt"], "gold": pair["answer"], "generated": gen, "hit": str(hit)})
@@ -265,6 +270,7 @@ def main() -> None:
         "embedding_dim": args.embedding_dim,
         "hidden_dim": args.hidden_dim,
         "num_layers": args.num_layers,
+        "sample_temperature": args.sample_temperature,
         "device": str(device),
     }
     (output_dir / "metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")

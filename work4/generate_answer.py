@@ -16,7 +16,7 @@ def main() -> None:
     parser.add_argument("--vocab", default="work4/results/lstm_lm/vocab.json")
     parser.add_argument("--prompt", required=True, help="Problem text. The script appends 答曰： if it is missing.")
     parser.add_argument("--max-new-chars", type=int, default=50)
-    parser.add_argument("--temperature", type=float, default=0.75)
+    parser.add_argument("--temperature", type=float, default=0.0, help="Use 0 for greedy decoding.")
     parser.add_argument("--device", default="auto")
     args = parser.parse_args()
 
@@ -45,4 +45,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

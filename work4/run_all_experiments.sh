@@ -2,9 +2,9 @@
 set -euo pipefail
 
 PYTHON=${PYTHON:-python3}
-LM_EPOCHS=${LM_EPOCHS:-150}
+LM_EPOCHS=${LM_EPOCHS:-300}
 EMB_EPOCHS=${EMB_EPOCHS:-40}
-BATCH_SIZE=${BATCH_SIZE:-64}
+BATCH_SIZE=${BATCH_SIZE:-32}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -12,7 +12,12 @@ cd "$REPO_ROOT"
 
 "$PYTHON" work4/train_lm.py \
   --epochs "$LM_EPOCHS" \
-  --batch-size "$BATCH_SIZE"
+  --batch-size "$BATCH_SIZE" \
+  --seq-len 384 \
+  --embedding-dim 256 \
+  --hidden-dim 512 \
+  --dropout 0.1 \
+  --sample-temperature 0
 
 "$PYTHON" work4/train_word2vec.py \
   --epochs "$EMB_EPOCHS"
