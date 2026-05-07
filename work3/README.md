@@ -4,12 +4,6 @@
 
 参考 notebook 位于 `work3/demo-gan/`，本项目将其中 MNIST GAN / CGAN 的思路整理为可复现实验代码。
 
-## 环境
-
-```bash
-pip install -r work3/requirements.txt
-```
-
 ## 一键训练与推理
 
 ```bash
