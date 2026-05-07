@@ -13,12 +13,6 @@
 bash work4/run_all_experiments.sh
 ```
 
-可调整训练轮数：
-
-```bash
-LM_EPOCHS=80 EMB_EPOCHS=40 BATCH_SIZE=256 bash work4/run_all_experiments.sh
-```
-
 ## 单独训练 LSTM 语言模型
 
 ```bash

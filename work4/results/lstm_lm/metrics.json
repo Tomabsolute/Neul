@@ -1,0 +1,17 @@
+{
+  "model": "CharLSTM",
+  "num_qa_pairs": 452,
+  "num_train_pairs": 385,
+  "num_val_pairs": 67,
+  "vocab_size": 456,
+  "best_val_loss": 0.6955744984218121,
+  "best_val_ppl": 2.004860532365779,
+  "answer_keyword_hit_rate": 1.0,
+  "epochs": 80,
+  "batch_size": 256,
+  "seq_len": 96,
+  "embedding_dim": 128,
+  "hidden_dim": 256,
+  "num_layers": 2,
+  "device": "cuda"
+}

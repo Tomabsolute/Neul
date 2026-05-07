@@ -2,9 +2,9 @@
 set -euo pipefail
 
 PYTHON=${PYTHON:-python3}
-LM_EPOCHS=${LM_EPOCHS:-40}
-EMB_EPOCHS=${EMB_EPOCHS:-25}
-BATCH_SIZE=${BATCH_SIZE:-128}
+LM_EPOCHS=${LM_EPOCHS:-80}
+EMB_EPOCHS=${EMB_EPOCHS:-40}
+BATCH_SIZE=${BATCH_SIZE:-256}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"

@@ -1,0 +1,13 @@
+{
+  "model": "SkipGramNegativeSampling",
+  "vocab_size": 1046,
+  "num_tokens": 59239,
+  "num_pairs": 473892,
+  "final_loss": 2.3327181480959087,
+  "epochs": 40,
+  "batch_size": 2048,
+  "embedding_dim": 128,
+  "window_size": 4,
+  "negative_samples": 8,
+  "device": "cuda"
+}
