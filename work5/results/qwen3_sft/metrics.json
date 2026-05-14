@@ -1,0 +1,17 @@
+{
+  "stage": "sft",
+  "framework": "Unsloth",
+  "base_model": "unsloth/Qwen3-0.6B-unsloth-bnb-4bit",
+  "dataset": "work5/data/sft.jsonl",
+  "num_examples": 58,
+  "max_seq_length": 1024,
+  "max_steps": 800,
+  "batch_size": 2,
+  "gradient_accumulation_steps": 8,
+  "learning_rate": 0.0002,
+  "lora_r": 16,
+  "lora_alpha": 32,
+  "train_runtime": 2921.4617,
+  "train_loss": 0.13770580634474755,
+  "cuda": true
+}

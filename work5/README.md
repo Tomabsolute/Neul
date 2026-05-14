@@ -50,6 +50,12 @@ pip install -r work5/requirements-no-unsloth.txt
 pip install --no-deps unsloth
 ```
 
+如果 DPO 阶段提示 `No module named 'weave'`，补装：
+
+```bash
+pip install weave -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
 若服务器没有 `torch`，建议使用服务器镜像或 Conda 安装与 CUDA 匹配的 PyTorch，再执行上面的两行。不要直接让 `pip install -r work5/requirements.txt` 在慢网络下下载 900MB 的 torch wheel。
 
 一键小规模试跑：

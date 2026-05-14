@@ -1,0 +1,15 @@
+{
+  "model": "TinyDecoderLM-from-scratch",
+  "vocab_size": 530,
+  "num_chars": 12892,
+  "max_steps": 2000,
+  "batch_size": 32,
+  "block_size": 256,
+  "n_layer": 6,
+  "n_head": 8,
+  "n_embd": 384,
+  "num_parameters": 11152896,
+  "final_val_loss": 6.90839455127716,
+  "final_val_ppl": 1000.6394766731056,
+  "device": "cuda"
+}

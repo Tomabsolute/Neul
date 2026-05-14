@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import unsloth
+
 import argparse
 
 import torch
@@ -13,8 +15,9 @@ def main() -> None:
     parser.add_argument("--adapter", default="work5/results/qwen3_dpo")
     parser.add_argument("--prompt", required=True)
     parser.add_argument("--max-seq-length", type=int, default=1024)
-    parser.add_argument("--max-new-tokens", type=int, default=128)
-    parser.add_argument("--temperature", type=float, default=0.2)
+    parser.add_argument("--max-new-tokens", type=int, default=48)
+    parser.add_argument("--temperature", type=float, default=0.0)
+    parser.add_argument("--repetition-penalty", type=float, default=1.15)
     args = parser.parse_args()
 
     model, tokenizer = FastLanguageModel.from_pretrained(
@@ -36,11 +39,15 @@ def main() -> None:
         outputs = model.generate(
             **inputs,
             max_new_tokens=args.max_new_tokens,
-            temperature=args.temperature,
+            temperature=args.temperature if args.temperature > 0 else None,
             do_sample=args.temperature > 0,
+            repetition_penalty=args.repetition_penalty,
+            no_repeat_ngram_size=6,
             pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
         )
-    print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+    new_tokens = outputs[0, inputs["input_ids"].shape[1] :]
+    print(tokenizer.decode(new_tokens, skip_special_tokens=True).strip())
 
 
 if __name__ == "__main__":

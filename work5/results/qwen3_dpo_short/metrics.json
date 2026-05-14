@@ -1,0 +1,17 @@
+{
+  "stage": "dpo",
+  "framework": "Unsloth",
+  "base_model": "unsloth/Qwen3-0.6B-unsloth-bnb-4bit",
+  "sft_adapter": "work5/results/qwen3_sft",
+  "dataset": "work5/data/dpo.jsonl",
+  "num_examples": 58,
+  "max_seq_length": 1024,
+  "max_steps": 50,
+  "batch_size": 1,
+  "gradient_accumulation_steps": 8,
+  "learning_rate": 1e-05,
+  "beta": 0.1,
+  "train_runtime": 295.3827,
+  "train_loss": 0.14017051696777344,
+  "cuda": true
+}
