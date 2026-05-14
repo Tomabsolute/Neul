@@ -12,7 +12,6 @@ from torch.utils.data import DataLoader, Dataset
 
 from src.data_utils import Vocab, char_tokens, normalize_text, read_text
 from src.models import SkipGramNegSampling
-from src.plotting import plot_embedding_neighbors
 
 
 class SkipGramDataset(Dataset):
@@ -142,8 +141,6 @@ def main() -> None:
             for token, score in rows:
                 f.write(f"- {token}: {score:.4f}\n")
             f.write("\n")
-    plot_embedding_neighbors(neighbors, output_dir / "neighbors.png")
-
     metrics = {
         "model": "SkipGramNegativeSampling",
         "vocab_size": len(vocab.itos),
@@ -163,4 +160,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

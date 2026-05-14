@@ -39,7 +39,7 @@
   \item 训练一个字符级 LSTM 序列生成模型，生成「答曰」后的答案；
   \item 训练一个文本嵌入模型，展示数学词汇或字符的相似关系；
   \item 记录训练损失、困惑度、答案关键词命中率与生成样例；
-  \item 提供可在服务器上直接运行的脚本与报告。
+  \item 提供可复现的训练、推理、可视化脚本与报告。
 \end{itemize}
 
 \section{数据集与预处理}
@@ -73,9 +73,9 @@
 模块 & 默认配置 \\
 \midrule
 输入 & 字符 ID 序列 \\
-Embedding & 128 维 \\
-LSTM & 2 层，隐藏维度 256 \\
-Dropout & 0.2 \\
+Embedding & 256 维 \\
+LSTM & 2 层，隐藏维度 512 \\
+Dropout & 0.1 \\
 Linear & 隐藏状态映射到词表大小 \\
 \bottomrule
 \end{tabular}
@@ -97,9 +97,11 @@ Linear & 隐藏状态映射到词表大小 \\
 项目 & 配置 \\
 \midrule
 训练文本 & 抽取出的题面--答案对 \\
-序列长度 & 256 \\
-Batch size & 64 \\
-Epoch & 150 \\
+序列长度 & 384 \\
+Batch size & 32 \\
+Epoch & 300 \\
+Embedding / Hidden & 256 / 512 \\
+生成温度 & 0，即贪心解码 \\
 优化器 & AdamW \\
 学习率 & $2\times10^{-3}$ \\
 梯度裁剪 & 1.0 \\
@@ -134,7 +136,7 @@ Embedding 维度 & 128 \\
 窗口大小 & 4 \\
 负样本数 & 8 \\
 Batch size & 2048 \\
-Epoch & 25，可在服务器上调大 \\
+Epoch & 40 \\
 优化器 & AdamW \\
 \bottomrule
 \end{tabular}
@@ -154,19 +156,19 @@ Epoch & 25，可在服务器上调大 \\
 \begin{verbatim}
 bash work4/run_all_experiments.sh
 \end{verbatim}
-服务器上可以使用：
+可通过环境变量调整训练轮数和 batch size：
 \begin{verbatim}
-LM_EPOCHS=150 EMB_EPOCHS=40 BATCH_SIZE=64 \
+LM_EPOCHS=300 EMB_EPOCHS=40 BATCH_SIZE=32 \
   bash work4/run_all_experiments.sh
 \end{verbatim}
 
 \section{实验结果展示}
-服务器实验使用 CUDA 训练，LSTM 训练 150 轮，Skip-gram 训练 40 轮。训练完成后，LSTM 语言模型输出 \texttt{metrics.json}、\texttt{history.csv}、\texttt{generation\_samples.md} 和训练曲线；嵌入模型输出 \texttt{neighbors.md}、\texttt{neighbors.json} 与近邻可视化图。
+本次实验中，LSTM 训练 300 轮，Skip-gram 训练 40 轮。训练完成后，LSTM 语言模型输出 \texttt{metrics.json}、\texttt{history.csv}、\texttt{generation\_samples.md} 和训练曲线；嵌入模型输出 \texttt{neighbors.md}、\texttt{neighbors.json} 与近邻记录。
 
 \begin{table}[H]
 \centering
 \small
-\caption{LSTM 语言模型服务器训练结果}
+\caption{LSTM 语言模型训练结果}
 \begin{tabular}{c|c}
 \toprule
 项目 & 数值 \\
@@ -174,12 +176,12 @@ LM_EPOCHS=150 EMB_EPOCHS=40 BATCH_SIZE=64 \
 题答对数量 & 452 \\
 训练 / 验证题答对 & 385 / 67 \\
 词表大小 & 451 \\
-最优验证 epoch & 147 \\
-最优验证 loss & 1.1857 \\
-最优验证 PPL & 3.2730 \\
-答案关键词命中率 & 0.6333 \\
-训练 epoch & 150 \\
-LSTM 参数规模 & 约 1--2M，随词表略变 \\
+最优验证 epoch & 41 \\
+最优验证 loss & 1.0663 \\
+最优验证 PPL & 2.9045 \\
+答案关键词命中率 & 0.9000 \\
+训练 epoch & 300 \\
+LSTM 参数规模 & 约 6.4M，随词表略变 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -187,7 +189,7 @@ LSTM 参数规模 & 约 1--2M，随词表略变 \\
 \begin{table}[H]
 \centering
 \small
-\caption{Skip-gram 嵌入模型服务器训练结果}
+\caption{Skip-gram 嵌入模型训练结果}
 \begin{tabular}{c|c}
 \toprule
 项目 & 数值 \\
@@ -208,20 +210,28 @@ Embedding 维度 & 128 \\
 \centering
 \IfFileExists{results/lstm_lm/curves.png}
 {\includegraphics[width=\columnwidth]{results/lstm_lm/curves.png}}
-{\fbox{\parbox{0.9\columnwidth}{\centering 服务器运行后生成 \texttt{results/lstm\_lm/curves.png}}}}
+{\fbox{\parbox{0.9\columnwidth}{\centering 运行后生成 \texttt{results/lstm\_lm/curves.png}}}}
 \caption{字符级 LSTM 训练曲线}
 \end{figure}
 
-\begin{figure}[H]
+\begin{table}[H]
 \centering
-\IfFileExists{results/word2vec/neighbors.png}
-{\includegraphics[width=\columnwidth]{results/word2vec/neighbors.png}}
-{\fbox{\parbox{0.9\columnwidth}{\centering 服务器运行后生成 \texttt{results/word2vec/neighbors.png}}}}
-\caption{Skip-gram 嵌入近邻相似度}
-\end{figure}
+\small
+\caption{Skip-gram 近邻示例}
+\begin{tabular}{c|l}
+\toprule
+查询字符 & 近邻示例 \\
+\midrule
+粟 & 粗米、饭、米、稻等粮食相关字 \\
+米 & 饭、粗米、稻、米制品相关字 \\
+尺 & 寸、丈、深、竿、绳等长度相关字 \\
+答 & 问、何、曰、冒号等问答结构相关符号 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{生成结果分析}
-训练曲线显示，监督式题答训练后验证集损失在第 147 轮达到最低，最终保存验证损失最低的 \texttt{best\_lstm\_lm.pt}。在手动测试题「今有田廣十五步，從十六步」上，模型生成「一畝」，与原书答案一致，说明模型能复现部分典型题型。
+训练曲线显示，监督式题答训练后验证集损失在第 41 轮达到最低，之后训练损失继续下降而验证损失上升，说明模型开始记忆训练集。最终保存验证损失最低的 \texttt{best\_lstm\_lm.pt}。在手动测试题「今有田廣十五步，從十六步」上，模型生成「一畝」，与原书答案一致，说明模型能复现部分典型题型。
 
 \begin{table}[H]
 \centering
@@ -235,22 +245,23 @@ Embedding 维度 & 128 \\
 圆形土堡，周四丈八尺，高一丈一尺 & 二千一百一十二尺 & 二千一百一十二尺 \\
 约分：九十一分之四十九 & 十三分之七 & 十三分之七 \\
 股四尺，弦五尺，求句 & 三尺 & 三尺 \\
-井徑五尺，不知其深 & 五丈七尺五寸 & 五丈二尺 \\
+井徑五尺，不知其深 & 五丈七尺五寸 & 五丈七尺五寸 \\
+共買豕，人出一百盈一百 & 一十人 & 一十人 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-从样例看，模型已经学习到《九章算术》的答案格式、数字表达和单位体系，例如「畝」「尺」「寸」「分之」等模式会稳定出现；部分短题和高频题型能够生成完全正确的答案，例如方田、约分和勾股样例。但模型仍不能可靠掌握精确算术推理，复杂均输、粮食换算和多变量问题中经常出现单位相关但数值错误的答案。关键词命中率为 0.6333，只能说明模型在部分验证样例中生成了相关数字或单位，不能等同于算术正确率。
+从样例看，模型已经学习到《九章算术》的答案格式、数字表达和单位体系，例如「畝」「尺」「寸」「分之」等模式会稳定出现；部分短题、高频题型和原文中结构较固定的问题能够生成完全正确的答案，例如方田、约分、勾股、井深和盈不足样例。验证样例中仍有少数失败案例，例如某些粟米换算题和价格题会生成其他题型的答案，说明 LSTM 主要学习文本模式和题型模板，不能保证真正执行算术推理。关键词命中率为 0.9000，说明相关单位和数字模式学习较充分，但仍不能等同于严格算术正确率。
 
 \subsection{嵌入结果分析}
-文本嵌入的近邻可以从另一个角度验证学习效果。服务器结果中，「粟」的近邻包含粗米、饭、稻、米等粮食换算相关字，「米」的近邻也集中在饭食和米制品语境中，说明模型较好捕捉到粟米章中的共现关系；「尺」的近邻包含「寸、丈、深、竿、绳」一类长度测量相关字，也符合勾股、井深类题目的语境。「田」的近邻中出现「頃」，「步」的近邻中出现「田」，说明面积单位关系也有一定体现。部分近邻如「惡、箕、圭」等不够理想，主要原因是字符级模型容易受到古文上下文和低频字共现干扰。
+文本嵌入的近邻可以从另一个角度验证学习效果。实验结果中，「粟」的近邻集中在粮食换算相关字，「米」的近邻也集中在饭食和米制品语境中，说明模型较好捕捉到粟米章中的共现关系；「尺」的近邻包含「寸、丈、深、竿、绳」一类长度测量相关字，也符合勾股、井深类题目的语境。「田」的近邻中出现「頃」，「步」的近邻中出现「田」，说明面积单位关系也有一定体现。部分近邻如「惡、箕、圭」等不够理想，主要原因是字符级模型容易受到古文上下文和低频字共现干扰。由于中文字体环境会影响 Matplotlib 图中文字显示，报告中采用表格展示近邻结果，完整近邻记录见 \texttt{results/word2vec/neighbors.md}。
 
 \section{不足与改进方向}
 \begin{itemize}
   \item 本实验使用字符级模型，能处理古文编码和繁体字，但长距离推理能力有限；
   \item LSTM 主要学习文本模式，不能保证精确执行算术运算；
   \item 关键词命中率是弱指标，后续可人工构造更多保留题型但改变数字的测试题；
-  \item 若服务器资源充足，可替换为 Transformer Decoder 或 Mamba，并增加上下文长度；
+  \item 若计算资源充足，可替换为 Transformer Decoder 或 Mamba，并增加上下文长度；
   \item 文本嵌入当前为字符级，可进一步加入基于规则的古汉语词表，训练词级 fastText。
 \end{itemize}
 

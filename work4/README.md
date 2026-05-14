@@ -13,13 +13,13 @@
 bash work4/run_all_experiments.sh
 ```
 
-当前服务器实验已完成，主要结果：
+当前实验已完成，主要结果：
 
 | 模型 | 指标 | 数值 |
 |---|---|---:|
-| CharLSTM | 最优验证 loss | 1.1857 |
-| CharLSTM | 最优验证 PPL | 3.2730 |
-| CharLSTM | 答案关键词命中率 | 0.6333 |
+| CharLSTM | 最优验证 loss | 1.0663 |
+| CharLSTM | 最优验证 PPL | 2.9045 |
+| CharLSTM | 答案关键词命中率 | 0.9000 |
 | Skip-gram | 最终 loss | 2.3327 |
 | Skip-gram | token 数 | 59239 |
 | Skip-gram | 样本对数 | 473892 |
@@ -75,7 +75,7 @@ python3 work4/train_word2vec.py \
 - `work4/results/word2vec/vocab.json`
 - `work4/results/word2vec/history.csv`
 - `work4/results/word2vec/neighbors.md`
-- `work4/results/word2vec/neighbors.png`
+- `work4/results/word2vec/neighbors.json`
 - `work4/results/word2vec/metrics.json`
 
 ## 查询文本嵌入近邻
@@ -106,4 +106,4 @@ cd work4
 xelatex report.tex
 ```
 
-报告中的图表会直接引用 `results/lstm_lm/curves.png` 和 `results/word2vec/neighbors.png`，当前 PDF 已按服务器结果更新。
+报告中的训练曲线引用 `results/lstm_lm/curves.png`；Skip-gram 结果在报告中用表格展示，完整近邻记录见 `results/word2vec/neighbors.md`。
