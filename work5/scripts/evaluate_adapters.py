@@ -79,7 +79,7 @@ def strip_think(text: str) -> str:
 
 def write_markdown(path: Path, rows: list[dict[str, str]]) -> None:
     lines = [
-        "| 题型 | 标准答案 | SFT 输出 | DPO-short 输出 |",
+        "| 题型 | 标准答案 | SFT 输出 | DPO 输出 |",
         "|---|---|---|---|",
     ]
     for row in rows:
@@ -93,7 +93,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Compare SFT and DPO adapters on fixed 孙子算经 prompts.")
     parser.add_argument("--model-name", default="unsloth/Qwen3-0.6B-unsloth-bnb-4bit")
     parser.add_argument("--sft-adapter", default="work5/results/qwen3_sft")
-    parser.add_argument("--dpo-adapter", default="work5/results/qwen3_dpo_short")
+    parser.add_argument("--dpo-adapter", default="work5/results/qwen3_dpo")
     parser.add_argument("--output-dir", default="work5/results/eval")
     parser.add_argument("--max-seq-length", type=int, default=1024)
     parser.add_argument("--max-new-tokens", type=int, default=64)

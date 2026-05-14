@@ -71,7 +71,7 @@ rejected & 二十二。或二十四。 \\
 \end{table}
 
 \section{算例一：从头训练}
-从头训练部分使用随机初始化的小型 decoder-only Transformer 作为可控基线。该模型不是为了超过 Qwen3，而是为了验证同一份古文数学语料能否驱动自回归语言模型学习局部统计规律。模型按字符建模，避免古文分词带来的额外误差。
+从头训练部分使用随机初始化的小型 decoder-only Transformer。它的作用有两点：第一，满足本作业对「从头训练」算例的要求，完整展示数据读取、token 化、自回归损失和生成流程；第二，作为 Qwen3 微调实验的对照，观察只有少量古文数学语料时，从零训练的模型能学到什么、又会在哪里失败。该模型按字符建模，避免古文分词带来的额外误差。实验结果显示它很快记忆训练集，但验证集损失上升，因此更适合作为训练流程和小语料局限性的说明，而不是最终可用的问答模型。
 
 \begin{table}[H]
 \centering
@@ -96,7 +96,7 @@ Token 粒度 & 字符 \\
 \centering
 \IfFileExists{results/scratch/curves.png}
 {\includegraphics[width=\columnwidth]{results/scratch/curves.png}}
-{\fbox{\parbox{0.9\columnwidth}{\centering 服务器运行后生成 \texttt{results/scratch/curves.png}}}}
+{\fbox{\parbox{0.9\columnwidth}{\centering 运行后生成 \texttt{results/scratch/curves.png}}}}
 \caption{从头训练损失曲线}
 \end{figure}
 
@@ -138,23 +138,24 @@ LoRA alpha & 32 \\
 初始化 & Qwen3 SFT adapter \\
 偏好算法 & DPO \\
 偏好系数 $\beta$ & 0.1 \\
-学习率 & $5\times10^{-5}$ \\
+学习率 & $1\times10^{-5}$ \\
 Batch size & 1 \\
 梯度累积 & 8 \\
+训练步数 & 50 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{运行方式}
-完整脚本位于 \texttt{work5/}。服务器可执行：
+完整脚本位于 \texttt{work5/}。一键运行命令为：
 \begin{verbatim}
 pip install -r work5/requirements.txt
 bash work5/run_all_experiments.sh
 \end{verbatim}
-其中 \texttt{SCRATCH\_STEPS}、\texttt{SFT\_STEPS}、\texttt{DPO\_STEPS} 可通过环境变量调整。若显存不足，可降低 batch size 或 max sequence length；若训练时间充足，可增加 SFT 与 DPO step 数。
+默认最终参数为从头训练 2000 steps、Qwen3 SFT 800 steps、DPO 50 steps，DPO 学习率为 $1\times10^{-5}$。
 
 \section{结果记录表}
-由于 Qwen3 0.6B 微调和 DPO 需要服务器 GPU 与模型下载，本报告保留结果记录表。服务器运行后将 \texttt{results/*/metrics.json} 中的实际数值填入即可。
+本实验得到的主要指标如下。由于《孙子算经》题答对数量较少，从头训练模型在训练集上快速收敛，但验证集困惑度升高，表现出明显记忆化；Qwen3 SFT 和 DPO 用于展示框架微调与偏好后训练流程。
 
 \begin{table}[H]
 \centering
@@ -165,10 +166,27 @@ bash work5/run_all_experiments.sh
 阶段 & 指标 & 数值 \\
 \midrule
 数据准备 & 题答对数量 & 65 \\
-从头训练 & 最终验证 loss / PPL & 运行后填入 \\
-Qwen3 SFT & train loss & 运行后填入 \\
-Qwen3 DPO & train loss & 运行后填入 \\
-生成测试 & 物不知数题输出 & 运行后填入 \\
+从头训练 & 最终验证 loss / PPL & 6.9084 / 1000.64 \\
+Qwen3 SFT & train loss & 0.1377 \\
+Qwen3 DPO & step / lr & 50 / $1\times10^{-5}$ \\
+生成测试 & 物不知数题输出 & 二十三 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{SFT 与 DPO 生成对比}
+\begin{tabular}{c|p{0.23\columnwidth}|p{0.23\columnwidth}|p{0.23\columnwidth}}
+\toprule
+题型 & 标准答案 & SFT 输出 & DPO 输出 \\
+\midrule
+物不知数 & 二十三。 & 二十三。 & 二十三。 \\
+鸡兔同笼 & 雉二十三。兔一十二。 & 雉二十三。兔一十二。 & 雉二十三。兔一十二。 \\
+三人共车 & 一十五車。三十九人。 & 一十五車。三十九人。 & 一十五車。三十九人。 \\
+佛书字数 & 一千八百二十七。 & 一千八百二十七。 & 一千八百二十七。 \\
+车轮匝数 & 九萬匝。 & 九萬匝。 & 九萬匝。 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -176,40 +194,11 @@ Qwen3 DPO & train loss & 运行后填入 \\
 推荐的人工评测题包括：物不知数题、鸡兔同笼题、度量衡题、余数同余题和分配题。评测时重点观察三点：是否输出简短答案，是否保留古文数字和单位，是否避免把其他题型的答案迁移到当前题目。
 
 \section{分析与不足}
-从头训练的小模型可以观察到语言建模损失下降，但由于《孙子算经》语料规模有限，随机初始化模型更容易学习局部字词搭配，而不具备稳定解题能力。Qwen3 SFT 借助预训练模型已有的中文和数学能力，预计能更快学习任务格式。DPO 后训练进一步把「原文答案」和「扰动答案」拉开，有助于减少单位错配和明显数值错误。
+从头训练的小模型可以观察到语言建模损失下降，但由于《孙子算经》语料规模有限，随机初始化模型很快记忆训练集：训练 loss 降至 0.031 左右，而验证 loss 升至 6.9084，说明泛化能力有限。Qwen3 SFT 借助预训练模型已有的中文和数学能力，更快学习任务格式，在「物不知数」测试中输出了正确答案「二十三」。初始 DPO 训练若使用 400 steps，会在小偏好集上出现重复生成；最终采用 50 steps、$1\times10^{-5}$ 学习率的 DPO，保持了正确输出。
 
 本实验的主要限制是偏好数据为自动扰动生成，质量低于人工标注；此外，《孙子算经》原文题目数量有限，训练集与测试集之间存在题型重复，生成正确并不必然说明模型学会了真正的算术推理。后续可构造保持题型但替换数字的合成测试集，单独评价模型的符号计算泛化能力。
 
 \section{结论}
-本作业选择 Unsloth 作为主框架，围绕《孙子算经》构造了从原始文本到预训练、SFT、DPO 的完整实验流程。代码覆盖从头训练基线、Qwen3 0.6B QLoRA 微调和偏好后训练，并提供可在服务器上复现实验的脚本。该流程能够展示模型是否学习到古文数学文本中的格式、术语和单位知识，同时也明确区分了文本模式学习与严格算术推理之间的差异。
-
-\begin{thebibliography}{9}
-\bibitem{transformer}
-Vaswani et al. Attention Is All You Need. arXiv:1706.03762, 2017. \url{https://arxiv.org/abs/1706.03762}
-
-\bibitem{lora}
-Hu et al. LoRA: Low-Rank Adaptation of Large Language Models. arXiv:2106.09685, 2021. \url{https://arxiv.org/abs/2106.09685}
-
-\bibitem{qlora}
-Dettmers et al. QLoRA: Efficient Finetuning of Quantized LLMs. arXiv:2305.14314, 2023. \url{https://arxiv.org/abs/2305.14314}
-
-\bibitem{dpo}
-Rafailov et al. Direct Preference Optimization: Your Language Model is Secretly a Reward Model. arXiv:2305.18290, 2023. \url{https://arxiv.org/abs/2305.18290}
-
-\bibitem{qwen3}
-Qwen Team. Qwen3 Technical Report. arXiv:2505.09388, 2025. \url{https://arxiv.org/abs/2505.09388}
-
-\bibitem{unsloth}
-Unsloth Documentation. Qwen3: How to Run and Fine-tune. \url{https://unsloth.ai/docs/models/qwen3-how-to-run-and-fine-tune}
-
-\bibitem{minimind}
-MiniMind Documentation. Model Training Guide. \url{https://minimind.readthedocs.io/en/stable/training/}
-
-\bibitem{nanogpt}
-Karpathy. nanoGPT: The simplest, fastest repository for training/finetuning medium-sized GPTs. \url{https://github.com/karpathy/nanoGPT}
-
-\bibitem{gutenberg-sunzi}
-Project Gutenberg. Sunzi Suanjing. \url{https://www.gutenberg.org/ebooks/24038}
-\end{thebibliography}
+本作业选择 Unsloth 作为主框架，围绕《孙子算经》构造了从原始文本到预训练、SFT、DPO 的完整实验流程。代码覆盖从头训练基线、Qwen3 0.6B QLoRA 微调和偏好后训练，并提供可复现实验脚本。该流程能够展示模型是否学习到古文数学文本中的格式、术语和单位知识，同时也明确区分了文本模式学习与严格算术推理之间的差异。
 
 \end{document}
