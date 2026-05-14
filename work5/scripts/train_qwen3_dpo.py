@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import unsloth
+
 import argparse
 import json
 from pathlib import Path
@@ -81,7 +83,7 @@ def main() -> None:
             max_prompt_length=args.max_seq_length // 2,
         ),
         train_dataset=dataset,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
     )
 
     stats = trainer.train()

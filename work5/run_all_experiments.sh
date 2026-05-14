@@ -6,6 +6,7 @@ SCRATCH_STEPS=${SCRATCH_STEPS:-300}
 SFT_STEPS=${SFT_STEPS:-100}
 DPO_STEPS=${DPO_STEPS:-80}
 MODEL_NAME=${MODEL_NAME:-unsloth/Qwen3-0.6B-unsloth-bnb-4bit}
+SKIP_SCRATCH=${SKIP_SCRATCH:-0}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -14,10 +15,14 @@ cd "$REPO_ROOT"
 "$PYTHON" work5/scripts/prepare_sunzi_dataset.py \
   --output-dir work5/data
 
-"$PYTHON" work5/scripts/train_from_scratch.py \
-  --train-file work5/data/pretrain.txt \
-  --output-dir work5/results/scratch \
-  --max-steps "$SCRATCH_STEPS"
+if [[ "$SKIP_SCRATCH" != "1" ]]; then
+  "$PYTHON" work5/scripts/train_from_scratch.py \
+    --train-file work5/data/pretrain.txt \
+    --output-dir work5/results/scratch \
+    --max-steps "$SCRATCH_STEPS"
+else
+  echo "Skipping scratch training because SKIP_SCRATCH=1"
+fi
 
 "$PYTHON" work5/scripts/train_qwen3_sft.py \
   --model-name "$MODEL_NAME" \

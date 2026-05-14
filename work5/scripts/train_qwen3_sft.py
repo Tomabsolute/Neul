@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import unsloth
+
 import argparse
 import json
 from pathlib import Path
 
 import torch
 from datasets import load_dataset
-from trl import SFTTrainer
-from transformers import TrainingArguments
+from trl import SFTConfig, SFTTrainer
 from unsloth import FastLanguageModel, is_bfloat16_supported
 
 
@@ -56,13 +57,13 @@ def main() -> None:
 
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         train_dataset=dataset,
-        dataset_text_field="text",
-        max_seq_length=args.max_seq_length,
-        packing=False,
-        args=TrainingArguments(
+        args=SFTConfig(
             output_dir=str(output_dir),
+            dataset_text_field="text",
+            max_length=args.max_seq_length,
+            packing=False,
             per_device_train_batch_size=args.batch_size,
             gradient_accumulation_steps=args.grad_accum,
             warmup_steps=10,

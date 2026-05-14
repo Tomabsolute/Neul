@@ -37,6 +37,21 @@ source .venv-work5/bin/activate
 pip install -r work5/requirements.txt
 ```
 
+如果下载 PyTorch 很慢，优先复用服务器已有的 `torch`。先检查：
+
+```bash
+python3 -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())"
+```
+
+若能正常输出版本和 CUDA 状态，不要重新安装 `torch`，改用：
+
+```bash
+pip install -r work5/requirements-no-unsloth.txt
+pip install --no-deps unsloth
+```
+
+若服务器没有 `torch`，建议使用服务器镜像或 Conda 安装与 CUDA 匹配的 PyTorch，再执行上面的两行。不要直接让 `pip install -r work5/requirements.txt` 在慢网络下下载 900MB 的 torch wheel。
+
 一键小规模试跑：
 
 ```bash
