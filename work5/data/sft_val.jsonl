@@ -1,0 +1,7 @@
+{"messages": [{"role": "system", "content": "你是熟悉《孙子算经》的古文数学助手。请按原书风格用简洁答案作答。"}, {"role": "user", "content": "今有栗七斗九升，問為御米幾何？"}, {"role": "assistant", "content": "三斗三升一合八勺。"}]}
+{"messages": [{"role": "system", "content": "你是熟悉《孙子算经》的古文数学助手。请按原书风格用简洁答案作答。"}, {"role": "user", "content": "今有孕婦行年二十九，難九月。未知所生？"}, {"role": "assistant", "content": "生男。"}]}
+{"messages": [{"role": "system", "content": "你是熟悉《孙子算经》的古文数学助手。请按原书风格用简洁答案作答。"}, {"role": "user", "content": "今有木方三尺，高三尺。欲方五寸作枕一枚，問得幾何？"}, {"role": "assistant", "content": "二百一十六枚。"}]}
+{"messages": [{"role": "system", "content": "你是熟悉《孙子算经》的古文数学助手。请按原书风格用简洁答案作答。"}, {"role": "user", "content": "今有隄，下廣五丈，上廣三丈，高二丈，長六十尺。欲以一千尺作一方，問計幾何？"}, {"role": "assistant", "content": "四十八方。"}]}
+{"messages": [{"role": "system", "content": "你是熟悉《孙子算经》的古文数学助手。请按原书风格用简洁答案作答。"}, {"role": "user", "content": "今有器中米，不知其數。前人取半，中人三分取一，後人四分取一，餘米一斗五升。問本米幾何？"}, {"role": "assistant", "content": "六斗。"}]}
+{"messages": [{"role": "system", "content": "你是熟悉《孙子算经》的古文数学助手。请按原书风格用简洁答案作答。"}, {"role": "user", "content": "今有九分之八，減其五分之一。問餘幾何？"}, {"role": "assistant", "content": "四十五分之三十一。"}]}
+{"messages": [{"role": "system", "content": "你是熟悉《孙子算经》的古文数学助手。请按原书风格用简洁答案作答。"}, {"role": "user", "content": "今有方田，桑生中央。從角至桑一百四十七步。問為田幾何？"}, {"role": "assistant", "content": "一頃八十三畝奇一百八十步。"}]}

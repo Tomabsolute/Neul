@@ -1,0 +1,9 @@
+{
+  "source": "work5/data/sunzi_suanjing.txt",
+  "num_pairs": 65,
+  "num_sft_train": 58,
+  "num_sft_val": 7,
+  "num_dpo_train": 58,
+  "num_dpo_val": 7,
+  "num_chars": 12892
+}
